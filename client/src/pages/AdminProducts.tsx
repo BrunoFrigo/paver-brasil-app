@@ -12,16 +12,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Edit2, Search } from "lucide-react";
+import { Plus, Trash2, Minus } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProductForm {
   name: string;
   type: string;
   description: string;
-  color: string;
-  dimensions: string;
-  price: string;
+  color?: string;
+  dimensions?: string;
+  price?: string;
   imageUrl?: string;
 }
 
@@ -44,12 +44,12 @@ export default function AdminProducts() {
   const { data: products = [], refetch } = trpc.products.list.useQuery();
   const createProduct = trpc.products.create.useMutation({
     onSuccess: () => {
-      toast.success("Produto criado com sucesso!");
+      toast.success("Produto adicionado com sucesso!");
       setShowForm(false);
       setFormData(defaultForm);
       refetch();
     },
-    onError: () => toast.error("Erro ao criar produto"),
+    onError: () => toast.error("Erro ao adicionar produto"),
   });
 
   const updateProduct = trpc.products.update.useMutation({
@@ -72,8 +72,8 @@ export default function AdminProducts() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.type) {
-      toast.error("Preencha os campos obrigatórios");
+    if (!formData.name) {
+      toast.error("Preencha o nome do produto");
       return;
     }
 
@@ -96,18 +96,21 @@ export default function AdminProducts() {
     setFormData(defaultForm);
   };
 
-  const filteredProducts = products.filter(
-    (p: any) =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.color?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter((p: any) =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.color?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-foreground">Gerenciar Produtos</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Produtos</h1>
+            <p className="text-muted-foreground mt-1">Catálogo de paver e blocos de concreto</p>
+          </div>
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogTrigger asChild>
               <Button className="bg-accent text-accent-foreground hover:opacity-90">
@@ -121,7 +124,7 @@ export default function AdminProducts() {
                   {editingId ? "Editar Produto" : "Novo Produto"}
                 </DialogTitle>
                 <DialogDescription>
-                  Preencha os detalhes do produto
+                  Adicione ou edite informações do produto
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -131,16 +134,16 @@ export default function AdminProducts() {
                     <Input
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Ex: Paver Vermelho"
+                      placeholder="Ex: Paver Retangular 6cm"
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-foreground">Tipo *</label>
+                    <label className="text-sm font-medium text-foreground">Tipo</label>
                     <Input
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      placeholder="Ex: Paver, Bloco"
+                      placeholder="Ex: Paver"
                       className="mt-1"
                     />
                   </div>
@@ -152,7 +155,7 @@ export default function AdminProducts() {
                     <Input
                       value={formData.color}
                       onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                      placeholder="Ex: Vermelho"
+                      placeholder="Ex: Cinza"
                       className="mt-1"
                     />
                   </div>
@@ -161,7 +164,7 @@ export default function AdminProducts() {
                     <Input
                       value={formData.dimensions}
                       onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
-                      placeholder="Ex: 20x10x8 cm"
+                      placeholder="Ex: 20x10x6cm"
                       className="mt-1"
                     />
                   </div>
@@ -172,9 +175,7 @@ export default function AdminProducts() {
                   <Input
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="Ex: 50.00"
-                    type="number"
-                    step="0.01"
+                    placeholder="Ex: 45,00"
                     className="mt-1"
                   />
                 </div>
@@ -184,7 +185,7 @@ export default function AdminProducts() {
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Descrição do produto"
+                    placeholder="Descreva o produto..."
                     className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background text-foreground"
                     rows={3}
                   />
@@ -195,7 +196,7 @@ export default function AdminProducts() {
                     Cancelar
                   </Button>
                   <Button type="submit" className="bg-accent text-accent-foreground">
-                    {editingId ? "Atualizar" : "Criar"}
+                    {editingId ? "Atualizar" : "Adicionar"}
                   </Button>
                 </div>
               </form>
@@ -204,13 +205,12 @@ export default function AdminProducts() {
         </div>
 
         {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+        <div>
           <Input
             placeholder="Buscar por nome, tipo ou cor..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="max-w-md"
           />
         </div>
 
@@ -218,76 +218,84 @@ export default function AdminProducts() {
         {filteredProducts.length === 0 ? (
           <Card className="p-12 text-center bg-card border border-border">
             <p className="text-muted-foreground mb-4">
-              {searchTerm ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
+              {products.length === 0 ? "Nenhum produto cadastrado" : "Nenhum produto encontrado"}
             </p>
-            {!searchTerm && (
-              <Button
-                onClick={() => setShowForm(true)}
-                className="bg-accent text-accent-foreground"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Criar Primeiro Produto
-              </Button>
-            )}
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-accent text-accent-foreground"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Primeiro Produto
+            </Button>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product: any) => (
               <Card
                 key={product.id}
-                className="p-6 bg-card border border-border hover:border-accent/50 transition-all"
+                className="bg-card border border-border hover:border-accent/50 transition-all p-6 flex flex-col"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground text-lg">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground">{product.type}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleEdit(product)}
-                      className="hover:bg-muted"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteProduct.mutate({ id: product.id })}
-                      className="hover:bg-red-500/10 hover:text-red-500"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                {/* Product Header */}
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{product.name}</h3>
+                  <p className="text-2xl font-bold text-accent mb-1">
+                    R$ {product.price || "0,00"}
+                    <span className="text-sm text-muted-foreground ml-2">
+                      /{product.type === "Paver" ? "m²" : "un"}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Stock Section */}
+                <div className="mb-4 pb-4 border-b border-border">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    Estoque
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 bg-muted/30 rounded-md p-1">
+                      <button className="p-1 hover:bg-muted rounded">
+                        <Minus className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      <span className="w-12 text-center text-foreground font-medium">0</span>
+                      <button className="p-1 hover:bg-muted rounded">
+                        <Plus className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </div>
+                    <span className="text-accent font-semibold">
+                      0 {product.type === "Paver" ? "m²" : "un"}
+                    </span>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-sm">
-                  {product.color && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Cor:</span>
-                      <span className="font-medium text-foreground">{product.color}</span>
-                    </div>
-                  )}
-                  {product.dimensions && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Dimensões:</span>
-                      <span className="font-medium text-foreground">{product.dimensions}</span>
-                    </div>
-                  )}
-                  {product.price && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Preço:</span>
-                      <span className="font-bold text-accent">R$ {product.price}</span>
-                    </div>
-                  )}
-                </div>
-
+                {/* Description */}
                 {product.description && (
-                  <p className="text-xs text-muted-foreground mt-4 line-clamp-2">
+                  <p className="text-sm text-muted-foreground mb-4 flex-grow">
                     {product.description}
                   </p>
                 )}
+
+                {/* Product Details */}
+                <div className="text-xs text-muted-foreground mb-4 space-y-1">
+                  {product.color && <p>Cor: {product.color}</p>}
+                  {product.dimensions && <p>Dimensões: {product.dimensions}</p>}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-4 border-t border-border">
+                  <button
+                    onClick={() => handleEdit(product)}
+                    className="flex-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded transition-colors"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => deleteProduct.mutate({ id: product.id })}
+                    className="flex-1 px-3 py-2 text-sm text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Excluir
+                  </button>
+                </div>
               </Card>
             ))}
           </div>
