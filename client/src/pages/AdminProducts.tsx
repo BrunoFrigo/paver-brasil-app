@@ -118,87 +118,79 @@ export default function AdminProducts() {
                 Novo Produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>
-                  {editingId ? "Editar Produto" : "Novo Produto"}
-                </DialogTitle>
+                <DialogTitle className="text-2xl">Cadastrar Produto</DialogTitle>
                 <DialogDescription>
-                  Adicione ou edite informações do produto
+                  Adicione um novo item ao catálogo.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Nome *</label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Ex: Paver Retangular 6cm"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Tipo</label>
-                    <Input
-                      value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      placeholder="Ex: Paver"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Cor</label>
-                    <Input
-                      value={formData.color}
-                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                      placeholder="Ex: Cinza"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Dimensões</label>
-                    <Input
-                      value={formData.dimensions}
-                      onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
-                      placeholder="Ex: 20x10x6cm"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="text-sm font-medium text-foreground">Preço (R$)</label>
+                  <label className="text-sm font-semibold text-foreground">Nome do Produto</label>
                   <Input
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="Ex: 45,00"
-                    className="mt-1"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Ex: Paver Retangular 6cm Natural"
+                    className="mt-2"
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-semibold text-foreground">Preço</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      placeholder="0.00"
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-foreground">Categoria</label>
+                    <select
+                      value={formData.type}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      className="w-full mt-2 px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                    >
+                      <option value="">Selecione</option>
+                      <option value="Paver">Paver</option>
+                      <option value="Bloco">Bloco</option>
+                      <option value="Guia">Guia</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div>
-                  <label className="text-sm font-medium text-foreground">Descrição</label>
+                  <label className="text-sm font-semibold text-foreground">Unidade</label>
+                  <select
+                    value={formData.dimensions || "m2"}
+                    onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
+                    className="w-full mt-2 px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  >
+                    <option value="m2">Metro Quadrado (m²)</option>
+                    <option value="un">Unidade (un)</option>
+                    <option value="m">Metro Linear (m)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground">Descrição (Opcional)</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Descreva o produto..."
-                    className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background text-foreground"
-                    rows={3}
+                    placeholder="Detalhes técnicos..."
+                    className="w-full mt-2 px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                    rows={4}
                   />
                 </div>
 
-                <div className="flex gap-3 justify-end">
-                  <Button type="button" variant="outline" onClick={handleCancel}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" className="bg-accent text-accent-foreground">
-                    {editingId ? "Atualizar" : "Adicionar"}
-                  </Button>
-                </div>
+                <Button type="submit" className="w-full bg-accent text-accent-foreground hover:opacity-90 py-2 text-base font-semibold">
+                  {editingId ? "Atualizar Produto" : "Salvar Produto"}
+                </Button>
               </form>
             </DialogContent>
           </Dialog>
