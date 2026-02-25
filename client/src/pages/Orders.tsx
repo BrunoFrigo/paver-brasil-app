@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
   Dialog,
@@ -8,14 +9,47 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Eye, Edit2, Trash2, ShoppingCart, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Trash2, Download, Filter } from "lucide-react";
 import { toast } from "sonner";
 
+interface OrderForm {
+  clientName: string;
+  clientEmail: string;
+  clientPhone?: string;
+  address?: string;
+  description: string;
+  area?: string;
+}
+
+const defaultForm: OrderForm = {
+  clientName: "",
+  clientEmail: "",
+  clientPhone: "",
+  address: "",
+  description: "",
+  area: "",
+};
+
 export default function Orders() {
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState<OrderForm>(defaultForm);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const { data: quotations = [], refetch } = trpc.quotations.list.useQuery();
+  
+  const createQuotation = trpc.quotations.create.useMutation({
+    onSuccess: () => {
+      toast.success("Pedido criado com sucesso!");
+      setShowForm(false);
+      setFormData(defaultForm);
+      refetch();
+    },
+    onError: () => toast.error("Erro ao criar pedido"),
+  });
+
   const updateQuotation = trpc.quotations.update.useMutation({
     onSuccess: () => {
       toast.success("Pedido atualizado com sucesso!");
@@ -32,275 +66,257 @@ export default function Orders() {
     onError: () => toast.error("Erro ao deletar pedido"),
   });
 
-  const selectedOrder = quotations.find((q) => q.id === selectedOrderId);
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="w-4 h-4 text-yellow-500" />;
-      case "approved":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case "completed":
-        return <CheckCircle className="w-4 h-4 text-blue-500" />;
-      case "rejected":
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      default:
-        return null;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.clientName || !formData.clientEmail) {
+      toast.error("Preencha nome e email do cliente");
+      return;
     }
+
+    createQuotation.mutate(formData);
   };
 
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      pending: "Pendente",
-      approved: "Aprovado",
-      completed: "Concluído",
-      rejected: "Rejeitado",
+  const handleCancel = () => {
+    setShowForm(false);
+    setFormData(defaultForm);
+  };
+
+  const handleStatusChange = (id: number, newStatus: string) => {
+    updateQuotation.mutate({
+      id,
+      status: newStatus as "pending" | "approved" | "completed" | "rejected",
+    });
+  };
+
+  const filteredQuotations = quotations.filter((q: any) =>
+    q.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    q.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<string, { label: string; color: string }> = {
+      pending: { label: "Pendente", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
+      approved: { label: "Aprovado", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+      completed: { label: "Concluído", color: "bg-green-500/20 text-green-400 border-green-500/30" },
+      rejected: { label: "Rejeitado", color: "bg-red-500/20 text-red-400 border-red-500/30" },
     };
-    return labels[status] || status;
+    const config = statusMap[status] || statusMap.pending;
+    return config;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-500/20 text-yellow-400";
-      case "approved":
-        return "bg-green-500/20 text-green-400";
-      case "completed":
-        return "bg-blue-500/20 text-blue-400";
-      case "rejected":
-        return "bg-red-500/20 text-red-400";
-      default:
-        return "bg-gray-500/20 text-gray-400";
-    }
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("pt-BR");
+  };
+
+  const formatCurrency = (value: string | number | null | undefined) => {
+    if (!value) return "R$ 0,00";
+    const num = typeof value === "string" ? parseFloat(value) : value;
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(num);
   };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
-          <p className="text-muted-foreground mt-1">Gerencie todos os seus pedidos e orçamentos</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
+            <p className="text-muted-foreground mt-1">Controle de orçamentos e vendas</p>
+          </div>
+          <Dialog open={showForm} onOpenChange={setShowForm}>
+            <DialogTrigger asChild>
+              <Button className="bg-accent text-accent-foreground hover:opacity-90">
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Pedido
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Novo Pedido</DialogTitle>
+                <DialogDescription>
+                  Crie um novo pedido/orçamento para o cliente.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-sm font-semibold text-foreground">Nome do Cliente *</label>
+                  <Input
+                    value={formData.clientName}
+                    onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+                    placeholder="Ex: João Silva"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground">Email *</label>
+                  <Input
+                    type="email"
+                    value={formData.clientEmail}
+                    onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
+                    placeholder="Ex: joao@email.com"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground">Telefone</label>
+                  <Input
+                    value={formData.clientPhone}
+                    onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
+                    placeholder="Ex: (11) 99999-9999"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground">Endereço</label>
+                  <Input
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="Ex: Rua Principal, 123"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground">Descrição *</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Descreva o pedido/orçamento..."
+                    className="w-full mt-2 px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground">Área (m²)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.area}
+                    onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                    placeholder="Ex: 500"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div className="flex gap-3 justify-end pt-4">
+                  <Button type="button" variant="outline" onClick={handleCancel}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="bg-accent text-accent-foreground">
+                    Criar Pedido
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="p-6 bg-card border border-border">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Total
-                </p>
-                <p className="text-3xl font-bold text-foreground mt-2">{quotations.length}</p>
-              </div>
-              <div className="p-3 bg-accent/10 rounded-lg">
-                <ShoppingCart className="w-6 h-6 text-accent" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-card border border-border">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Pendentes
-                </p>
-                <p className="text-3xl font-bold text-yellow-400 mt-2">
-                  {quotations.filter((q: any) => q.status === "pending").length}
-                </p>
-              </div>
-              <div className="p-3 bg-yellow-500/10 rounded-lg">
-                <Clock className="w-6 h-6 text-yellow-400" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-card border border-border">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Aprovados
-                </p>
-                <p className="text-3xl font-bold text-green-400 mt-2">
-                  {quotations.filter((q: any) => q.status === "approved").length}
-                </p>
-              </div>
-              <div className="p-3 bg-green-500/10 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-400" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-card border border-border">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Concluídos
-                </p>
-                <p className="text-3xl font-bold text-blue-400 mt-2">
-                  {quotations.filter((q: any) => q.status === "completed").length}
-                </p>
-              </div>
-              <div className="p-3 bg-blue-500/10 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-blue-400" />
-              </div>
-            </div>
-          </Card>
+        {/* Search and Filters */}
+        <div className="flex gap-4 items-center flex-wrap">
+          <div className="flex-1 min-w-64">
+            <Input
+              placeholder="Buscar por cliente ou pedido..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button variant="outline" className="gap-2">
+            <Filter className="w-4 h-4" />
+            Filtros
+          </Button>
+          <Button variant="outline" className="gap-2">
+            <Download className="w-4 h-4" />
+            Exportar
+          </Button>
         </div>
 
         {/* Orders Table */}
-        <Card className="p-6 bg-card border border-border">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Lista de Pedidos</h2>
-          {quotations.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Nenhum pedido cadastrado</p>
-          ) : (
+        {filteredQuotations.length === 0 ? (
+          <Card className="p-12 text-center bg-card border border-border">
+            <p className="text-muted-foreground mb-4">
+              {quotations.length === 0 ? "Nenhum pedido cadastrado" : "Nenhum pedido encontrado"}
+            </p>
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-accent text-accent-foreground"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Primeiro Pedido
+            </Button>
+          </Card>
+        ) : (
+          <Card className="bg-card border border-border overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="border-b border-border">
-                  <tr>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Cliente</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Email</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Data</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Ações</th>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Cliente</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Descrição</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Data</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Valor Total</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Entrega</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                    <th className="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">Ação</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {quotations.map((order: any) => (
-                    <tr key={order.id} className="border-b border-border hover:bg-muted/30">
-                      <td className="py-3 px-4 font-medium text-foreground">{order.clientName}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{order.clientEmail}</td>
-                      <td className="py-3 px-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {getStatusIcon(order.status)}
-                          {getStatusLabel(order.status)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-muted-foreground">
-                        {new Date(order.createdAt).toLocaleDateString("pt-BR")}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setSelectedOrderId(order.id)}
-                            className="hover:bg-muted"
+                  {filteredQuotations.map((quotation: any) => {
+                    const statusConfig = getStatusBadge(quotation.status);
+                    return (
+                      <tr key={quotation.id} className="border-b border-border hover:bg-muted/20 transition-colors">
+                        <td className="px-6 py-4 text-sm text-foreground font-medium">
+                          #{String(quotation.id).padStart(4, "0")}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-foreground font-medium">
+                          {quotation.clientName}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground max-w-xs truncate">
+                          {quotation.description}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {formatDate(quotation.createdAt)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-accent font-semibold">
+                          {formatCurrency(quotation.area)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          -
+                        </td>
+                        <td className="px-6 py-4">
+                          <select
+                            value={quotation.status}
+                            onChange={(e) => handleStatusChange(quotation.id, e.target.value)}
+                            className={`px-3 py-1 rounded-full text-xs font-semibold border ${statusConfig.color} bg-transparent cursor-pointer`}
                           >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => deleteQuotation.mutate({ id: order.id })}
-                            className="hover:bg-red-500/10 hover:text-red-500"
+                            <option value="pending">Pendente</option>
+                            <option value="approved">Aprovado</option>
+                            <option value="completed">Concluído</option>
+                            <option value="rejected">Rejeitado</option>
+                          </select>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => deleteQuotation.mutate({ id: quotation.id })}
+                            className="p-2 hover:bg-red-500/10 rounded transition-colors text-muted-foreground hover:text-red-400"
                           >
                             <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          )}
-        </Card>
-
-        {/* Order Detail Modal */}
-        {selectedOrder && (
-          <Dialog open={!!selectedOrderId} onOpenChange={() => setSelectedOrderId(null)}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Detalhes do Pedido</DialogTitle>
-                <DialogDescription>
-                  Informações completas do pedido #{selectedOrder.id}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Cliente</label>
-                    <p className="text-foreground mt-1">{selectedOrder.clientName}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Email</label>
-                    <p className="text-foreground mt-1">{selectedOrder.clientEmail}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Telefone</label>
-                    <p className="text-foreground mt-1">{selectedOrder.clientPhone || "-"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Status</label>
-                    <div className="mt-1">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
-                        {getStatusIcon(selectedOrder.status)}
-                        {getStatusLabel(selectedOrder.status)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Endereço</label>
-                  <p className="text-foreground mt-1">{selectedOrder.address || "-"}</p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Descrição</label>
-                  <p className="text-foreground mt-1">{selectedOrder.description || "-"}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Área (m²)</label>
-                    <p className="text-foreground mt-1">{selectedOrder.area || "-"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Data</label>
-                    <p className="text-foreground mt-1">
-                      {new Date(selectedOrder.createdAt).toLocaleDateString("pt-BR")}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedOrder.notes && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Notas</label>
-                    <p className="text-foreground mt-1">{selectedOrder.notes}</p>
-                  </div>
-                )}
-
-                <div className="flex gap-3 justify-end pt-4 border-t border-border">
-                  <Button
-                    variant="outline"
-                    onClick={() => setSelectedOrderId(null)}
-                  >
-                    Fechar
-                  </Button>
-                  <select
-                    value={selectedOrder.status}
-                    onChange={(e) =>
-                      updateQuotation.mutate({
-                        id: selectedOrder.id,
-                        status: e.target.value as any,
-                      })
-                    }
-                    className="px-3 py-2 bg-card border border-border rounded-md text-foreground"
-                  >
-                    <option value="pending">Pendente</option>
-                    <option value="approved">Aprovado</option>
-                    <option value="completed">Concluído</option>
-                    <option value="rejected">Rejeitado</option>
-                  </select>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          </Card>
         )}
       </div>
     </DashboardLayout>
