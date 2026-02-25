@@ -285,7 +285,7 @@ export default function Orders() {
                           {formatDate(quotation.createdAt)}
                         </td>
                         <td className="px-6 py-4 text-sm text-accent font-semibold">
-                          {formatCurrency(quotation.area)}
+                          R$ {parseFloat(quotation.area || "0").toFixed(2).replace(".", ",")}
                         </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
                           -
