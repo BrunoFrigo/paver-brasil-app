@@ -149,6 +149,12 @@ export async function updateQuotation(id: number, data: Partial<InsertQuotation>
   return db.update(quotations).set(data).where(eq(quotations.id, id));
 }
 
+export async function deleteQuotation(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(quotations).where(eq(quotations.id, id));
+}
+
 // Gallery queries
 export async function getAllGalleryWorks() {
   const db = await getDb();

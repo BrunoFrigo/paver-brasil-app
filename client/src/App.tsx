@@ -6,7 +6,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
-import AdminQuotations from "./pages/AdminQuotations";
+import Clients from "./pages/Clients";
+import Orders from "./pages/Orders";
 import AdminGallery from "./pages/AdminGallery";
 
 function Router() {
@@ -14,7 +15,8 @@ function Router() {
     <Switch>
       <Route path="/" component={AdminDashboard} />
       <Route path="/produtos" component={AdminProducts} />
-      <Route path="/orcamentos" component={AdminQuotations} />
+      <Route path="/clientes" component={Clients} />
+      <Route path="/pedidos" component={Orders} />
       <Route path="/galeria" component={AdminGallery} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
@@ -31,7 +33,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
-        defaultTheme="light"
+        defaultTheme="dark"
         // switchable
       >
         <TooltipProvider>

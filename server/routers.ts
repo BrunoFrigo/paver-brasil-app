@@ -108,6 +108,12 @@ export const appRouter = router({
         const { id, ...data } = input;
         return db.updateQuotation(id, data);
       }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        return db.deleteQuotation(input.id);
+      }),
   }),
 
   gallery: router({
