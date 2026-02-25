@@ -94,6 +94,7 @@ export const appRouter = router({
         address: z.string().optional(),
         description: z.string().optional(),
         area: z.string().optional(),
+        totalPrice: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const result = await db.createQuotation({

@@ -22,6 +22,7 @@ interface OrderForm {
   address?: string;
   description: string;
   area?: string;
+  totalPrice?: string;
 }
 
 const defaultForm: OrderForm = {
@@ -31,6 +32,7 @@ const defaultForm: OrderForm = {
   address: "",
   description: "",
   area: "",
+  totalPrice: "",
 };
 
 export default function Orders() {
@@ -193,16 +195,29 @@ export default function Orders() {
                   />
                 </div>
 
-                <div>
-                  <label className="text-sm font-semibold text-foreground">Área (m²)</label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.area}
-                    onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                    placeholder="Ex: 500"
-                    className="mt-2"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-semibold text-foreground">Área (m²)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.area}
+                      onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                      placeholder="Ex: 500"
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-foreground">Valor Total (R$)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.totalPrice}
+                      onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
+                      placeholder="Ex: 5000.00"
+                      className="mt-2"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex gap-3 justify-end pt-4">
@@ -261,6 +276,7 @@ export default function Orders() {
                     <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Cliente</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Descrição</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Data</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Área (m²)</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Valor Total</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Entrega</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
@@ -284,8 +300,11 @@ export default function Orders() {
                         <td className="px-6 py-4 text-sm text-muted-foreground">
                           {formatDate(quotation.createdAt)}
                         </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {quotation.area ? parseFloat(quotation.area).toFixed(0) : "0"} m²
+                        </td>
                         <td className="px-6 py-4 text-sm text-accent font-semibold">
-                          R$ {parseFloat(quotation.area || "0").toFixed(2).replace(".", ",")}
+                          {quotation.totalPrice ? formatCurrency(quotation.totalPrice) : "R$ 0,00"}
                         </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
                           -
