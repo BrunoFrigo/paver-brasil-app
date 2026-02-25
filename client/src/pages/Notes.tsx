@@ -249,6 +249,10 @@ export default function Notes() {
                         </button>
                       </div>
                     </div>
+                    <p className={`text-xs mb-2 ${color?.text} opacity-60`}>
+                      {new Date(note.createdAt).toLocaleDateString('pt-BR')} às{' '}
+                      {new Date(note.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                     <p className={`text-sm mb-3 ${color?.text} opacity-90`}>
                       {note.content}
                     </p>
@@ -303,6 +307,10 @@ export default function Notes() {
                         <PinOff className={`w-4 h-4 ${color?.text}`} />
                       </button>
                     </div>
+                    <p className={`text-xs mb-2 ${color?.text} opacity-60`}>
+                      {new Date(note.createdAt).toLocaleDateString('pt-BR')} às{' '}
+                      {new Date(note.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                     <p className={`text-sm mb-3 ${color?.text} opacity-90`}>
                       {note.content}
                     </p>
