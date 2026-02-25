@@ -103,16 +103,6 @@ export default function Login() {
               )}
             </Button>
           </form>
-
-          <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
-            <p className="text-xs text-muted-foreground text-center">
-              <strong>Credenciais de Demo:</strong>
-              <br />
-              Usuário: claudineifrigo
-              <br />
-              Senha: paverbrasil2026
-            </p>
-          </div>
         </div>
       </Card>
     </div>
