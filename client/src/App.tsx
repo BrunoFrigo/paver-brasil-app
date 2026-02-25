@@ -4,9 +4,6 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import Catalog from "./pages/Catalog";
-import QuotationRequest from "./pages/QuotationRequest";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import AdminQuotations from "./pages/AdminQuotations";
@@ -15,13 +12,10 @@ import AdminGallery from "./pages/AdminGallery";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/catalogo" component={Catalog} />
-      <Route path="/orcamento" component={QuotationRequest} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/produtos" component={AdminProducts} />
-      <Route path="/admin/orcamentos" component={AdminQuotations} />
-      <Route path="/admin/galeria" component={AdminGallery} />
+      <Route path="/" component={AdminDashboard} />
+      <Route path="/produtos" component={AdminProducts} />
+      <Route path="/orcamentos" component={AdminQuotations} />
+      <Route path="/galeria" component={AdminGallery} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

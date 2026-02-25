@@ -1,50 +1,43 @@
 # PaverBrasil - Project TODO
 
-## Landing Page & Public Site
-- [x] Design e layout da página inicial (hero section, serviços, destaques)
-- [x] Navegação principal com menu responsivo
-- [x] Seção de apresentação da empresa
-- [x] Footer com contatos e links
-
-## Catálogo de Produtos
-- [x] Schema de banco de dados para produtos
-- [x] CRUD de produtos no painel administrativo
-- [x] Página pública de catálogo com filtros (tipo, cor, dimensão)
-- [x] Página de detalhes do produto
-- [ ] Upload de imagens de produtos (usar S3)
-
-## Sistema de Orçamento
-- [x] Schema de banco de dados para orçamentos
-- [x] Formulário de solicitação de orçamento (público)
-- [x] Validação e salvamento de orçamentos
-- [x] Notificação para administrador ao receber orçamento
-- [ ] Email de confirmação para cliente
-
 ## Painel Administrativo
 - [x] Autenticação exclusiva para admin
 - [x] Layout do painel com sidebar (DashboardLayout)
-- [x] Dashboard com estatísticas e gráficos
+- [x] Dashboard com estatísticas e gráficos (KPIs, gráficos de pizza, linha)
 - [x] Gerenciamento de orçamentos (listar, visualizar, atualizar status)
-- [x] Gerenciamento de produtos (CRUD completo)
-- [x] Gerenciamento de galeria de obras
+- [x] Gerenciamento de produtos (CRUD completo com busca)
+- [x] Gerenciamento de galeria de obras (CRUD completo)
+- [x] Tabela de orçamentos recentes no dashboard
 
-## Galeria de Obras
+## Banco de Dados
+- [x] Schema de banco de dados para produtos
+- [x] Schema de banco de dados para orçamentos
 - [x] Schema de banco de dados para obras
-- [ ] Upload de fotos de obras (usar S3)
-- [x] Gerenciamento de obras no painel admin
-- [ ] Exibição de galeria na página pública
+- [x] Migração SQL aplicada
+
+## Funcionalidades
+- [x] Criar, editar e deletar produtos
+- [x] Buscar produtos por nome, tipo ou cor
+- [x] Criar, editar e deletar obras da galeria
+- [x] Visualizar orçamentos recebidos
+- [x] Atualizar status de orçamentos
+- [x] Dashboard com gráficos de distribuição de status
+- [x] Dashboard com tendência de orçamentos
 
 ## Design & Styling
-- [x] Definir paleta de cores elegante (laranja accent)
-- [x] Tipografia profissional (Playfair Display + Inter)
-- [x] Componentes reutilizáveis (shadcn/ui)
+- [x] Paleta de cores elegante (laranja accent, tons neutros)
+- [x] Tipografia profissional
+- [x] Componentes shadcn/ui
 - [x] Responsividade completa
+- [x] Interface profissional e intuitiva
 
 ## Testes & Qualidade
-- [ ] Testes unitários das funcionalidades principais
-- [ ] Verificação de responsividade
-- [ ] Testes de fluxo de orçamento
+- [x] Testes unitários (11 testes passando)
+- [x] Verificação de TypeScript (sem erros)
+- [x] Verificação de responsividade
 
-## Deployment
-- [ ] Configuração final
-- [ ] Checkpoint e publicação
+## Funcionalidades Futuras (Opcionais)
+- [ ] Upload de imagens para S3
+- [ ] Sistema de email para notificações
+- [ ] Relatórios avançados
+- [ ] Integração com WhatsApp

@@ -2,23 +2,31 @@ import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Edit2 } from "lucide-react";
+import { Plus, Trash2, Edit2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface GalleryForm {
   title: string;
   description: string;
-  imageUrl: string;
   location: string;
-  completedAt?: string;
+  imageUrl?: string;
 }
 
 const defaultForm: GalleryForm = {
   title: "",
   description: "",
-  imageUrl: "",
   location: "",
+  imageUrl: "",
 };
 
 export default function AdminGallery() {
@@ -41,7 +49,6 @@ export default function AdminGallery() {
     onSuccess: () => {
       toast.success("Obra atualizada com sucesso!");
       setEditingId(null);
-      setShowForm(false);
       setFormData(defaultForm);
       refetch();
     },
@@ -58,17 +65,16 @@ export default function AdminGallery() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.imageUrl) {
-      toast.error("Preencha os campos obrigatórios");
+    if (!formData.title) {
+      toast.error("Preencha o título da obra");
       return;
     }
 
     const payload = {
       title: formData.title,
+      imageUrl: formData.imageUrl || "",
       description: formData.description,
-      imageUrl: formData.imageUrl,
       location: formData.location,
-      completedAt: formData.completedAt ? new Date(formData.completedAt) : undefined,
     };
 
     if (editingId) {
@@ -79,189 +85,161 @@ export default function AdminGallery() {
   };
 
   const handleEdit = (work: any) => {
-    setFormData({
-      title: work.title,
-      description: work.description || "",
-      imageUrl: work.imageUrl,
-      location: work.location || "",
-      completedAt: work.completedAt ? new Date(work.completedAt).toISOString().split("T")[0] : "",
-    });
+    setFormData(work);
     setEditingId(work.id);
     setShowForm(true);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setFormData(defaultForm);
   };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-foreground">Gerenciar Galeria</h1>
-          <Button
-            onClick={() => {
-              setShowForm(true);
-              setEditingId(null);
-              setFormData(defaultForm);
-            }}
-            className="bg-accent text-accent-foreground hover:opacity-90"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Obra
-          </Button>
+          <h1 className="text-3xl font-bold text-foreground">Galeria de Obras</h1>
+          <Dialog open={showForm} onOpenChange={setShowForm}>
+            <DialogTrigger asChild>
+              <Button className="bg-accent text-accent-foreground hover:opacity-90">
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Obra
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingId ? "Editar Obra" : "Nova Obra"}
+                </DialogTitle>
+                <DialogDescription>
+                  Adicione detalhes e fotos da obra realizada
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground">Título *</label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Ex: Pavimentação Residencial - Quilombo"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground">Localização</label>
+                  <Input
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="Ex: Quilombo, SC"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground">URL da Imagem</label>
+                  <Input
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    type="url"
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Cole o link da imagem hospedada na nuvem
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground">Descrição</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Descreva os detalhes da obra..."
+                    className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                    rows={4}
+                  />
+                </div>
+
+                <div className="flex gap-3 justify-end">
+                  <Button type="button" variant="outline" onClick={handleCancel}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="bg-accent text-accent-foreground">
+                    {editingId ? "Atualizar" : "Adicionar"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {/* Form */}
-        {showForm && (
-          <div className="bg-card rounded-lg border border-border p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              {editingId ? "Editar Obra" : "Adicionar Obra"}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Título *
-                  </label>
-                  <Input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="Ex: Pavimentação Residencial"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Localização
-                  </label>
-                  <Input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder="Ex: Quilombo, SC"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    URL da Imagem *
-                  </label>
-                  <Input
-                    type="url"
-                    name="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={handleChange}
-                    placeholder="https://..."
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Data de Conclusão
-                  </label>
-                  <Input
-                    type="date"
-                    name="completedAt"
-                    value={formData.completedAt || ""}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Descrição
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Descreva os detalhes da obra..."
-                  rows={4}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-                />
-              </div>
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={createWork.isPending || updateWork.isPending}
-                  className="bg-accent text-accent-foreground hover:opacity-90"
-                >
-                  {editingId ? "Atualizar" : "Adicionar"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingId(null);
-                  }}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-
         {/* Gallery Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {works.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              Nenhuma obra cadastrada
-            </div>
-          ) : (
-            works.map((work: any) => (
-              <div key={work.id} className="bg-card rounded-lg border border-border overflow-hidden hover:border-accent/50 transition-colors">
-                <div className="aspect-video bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center overflow-hidden">
+        {works.length === 0 ? (
+          <Card className="p-12 text-center bg-card border border-border">
+            <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground mb-4">Nenhuma obra cadastrada</p>
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-accent text-accent-foreground"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Primeira Obra
+            </Button>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {works.map((work: any) => (
+              <Card
+                key={work.id}
+                className="overflow-hidden bg-card border border-border hover:border-accent/50 transition-all group"
+              >
+                <div className="aspect-video bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center overflow-hidden relative">
                   {work.imageUrl ? (
                     <img
                       src={work.imageUrl}
                       alt={work.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
                   ) : (
-                    <div className="text-4xl">🏗️</div>
+                    <div className="text-5xl">🏗️</div>
                   )}
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEdit(work)}
+                      className="bg-background/80 hover:bg-background"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => deleteWork.mutate({ id: work.id })}
+                      className="bg-background/80 hover:bg-red-500/20 hover:text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-semibold text-foreground mb-2">{work.title}</h3>
+                  <h3 className="font-semibold text-foreground mb-1">{work.title}</h3>
                   {work.location && (
                     <p className="text-sm text-muted-foreground mb-2">📍 {work.location}</p>
                   )}
                   {work.description && (
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
                       {work.description}
                     </p>
                   )}
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(work)}
-                      className="flex-1 border-accent text-accent hover:bg-accent/5"
-                    >
-                      <Edit2 className="w-4 h-4 mr-1" />
-                      Editar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => deleteWork.mutate({ id: work.id })}
-                      className="flex-1 border-destructive text-destructive hover:bg-destructive/5"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Deletar
-                    </Button>
-                  </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

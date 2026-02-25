@@ -1,10 +1,18 @@
 import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Edit2 } from "lucide-react";
+import { Plus, Trash2, Edit2, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProductForm {
@@ -14,7 +22,7 @@ interface ProductForm {
   color: string;
   dimensions: string;
   price: string;
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 const defaultForm: ProductForm = {
@@ -28,10 +36,10 @@ const defaultForm: ProductForm = {
 };
 
 export default function AdminProducts() {
-  const { user, isAuthenticated } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<ProductForm>(defaultForm);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: products = [], refetch } = trpc.products.list.useQuery();
   const createProduct = trpc.products.create.useMutation({
@@ -48,7 +56,6 @@ export default function AdminProducts() {
     onSuccess: () => {
       toast.success("Produto atualizado com sucesso!");
       setEditingId(null);
-      setShowForm(false);
       setFormData(defaultForm);
       refetch();
     },
@@ -83,210 +90,208 @@ export default function AdminProducts() {
     setShowForm(true);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setFormData(defaultForm);
   };
+
+  const filteredProducts = products.filter(
+    (p: any) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.color?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-foreground">Gerenciar Produtos</h1>
-          <Button
-            onClick={() => {
-              setShowForm(true);
-              setEditingId(null);
-              setFormData(defaultForm);
-            }}
-            className="bg-accent text-accent-foreground hover:opacity-90"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Produto
-          </Button>
+          <Dialog open={showForm} onOpenChange={setShowForm}>
+            <DialogTrigger asChild>
+              <Button className="bg-accent text-accent-foreground hover:opacity-90">
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Produto
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingId ? "Editar Produto" : "Novo Produto"}
+                </DialogTitle>
+                <DialogDescription>
+                  Preencha os detalhes do produto
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Nome *</label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Ex: Paver Vermelho"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Tipo *</label>
+                    <Input
+                      value={formData.type}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      placeholder="Ex: Paver, Bloco"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Cor</label>
+                    <Input
+                      value={formData.color}
+                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                      placeholder="Ex: Vermelho"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Dimensões</label>
+                    <Input
+                      value={formData.dimensions}
+                      onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
+                      placeholder="Ex: 20x10x8 cm"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground">Preço (R$)</label>
+                  <Input
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="Ex: 50.00"
+                    type="number"
+                    step="0.01"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-foreground">Descrição</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Descrição do produto"
+                    className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex gap-3 justify-end">
+                  <Button type="button" variant="outline" onClick={handleCancel}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="bg-accent text-accent-foreground">
+                    {editingId ? "Atualizar" : "Criar"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {/* Form */}
-        {showForm && (
-          <div className="bg-card rounded-lg border border-border p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              {editingId ? "Editar Produto" : "Novo Produto"}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Nome *
-                  </label>
-                  <Input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome, tipo ou cor..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Products Grid */}
+        {filteredProducts.length === 0 ? (
+          <Card className="p-12 text-center bg-card border border-border">
+            <p className="text-muted-foreground mb-4">
+              {searchTerm ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
+            </p>
+            {!searchTerm && (
+              <Button
+                onClick={() => setShowForm(true)}
+                className="bg-accent text-accent-foreground"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Criar Primeiro Produto
+              </Button>
+            )}
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProducts.map((product: any) => (
+              <Card
+                key={product.id}
+                className="p-6 bg-card border border-border hover:border-accent/50 transition-all"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground text-lg">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground">{product.type}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEdit(product)}
+                      className="hover:bg-muted"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => deleteProduct.mutate({ id: product.id })}
+                      className="hover:bg-red-500/10 hover:text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Tipo *
-                  </label>
-                  <Input
-                    type="text"
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                    placeholder="Ex: Paver, Bloco"
-                    required
-                  />
+
+                <div className="space-y-2 text-sm">
+                  {product.color && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Cor:</span>
+                      <span className="font-medium text-foreground">{product.color}</span>
+                    </div>
+                  )}
+                  {product.dimensions && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Dimensões:</span>
+                      <span className="font-medium text-foreground">{product.dimensions}</span>
+                    </div>
+                  )}
+                  {product.price && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Preço:</span>
+                      <span className="font-bold text-accent">R$ {product.price}</span>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Cor
-                  </label>
-                  <Input
-                    type="text"
-                    name="color"
-                    value={formData.color}
-                    onChange={handleChange}
-                    placeholder="Ex: Vermelho, Cinza"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Dimensões
-                  </label>
-                  <Input
-                    type="text"
-                    name="dimensions"
-                    value={formData.dimensions}
-                    onChange={handleChange}
-                    placeholder="Ex: 20x10x8 cm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Preço (R$)
-                  </label>
-                  <Input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    step="0.01"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    URL da Imagem
-                  </label>
-                  <Input
-                    type="url"
-                    name="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={handleChange}
-                    placeholder="https://..."
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Descrição
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-                />
-              </div>
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={createProduct.isPending || updateProduct.isPending}
-                  className="bg-accent text-accent-foreground hover:opacity-90"
-                >
-                  {editingId ? "Atualizar" : "Criar"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingId(null);
-                  }}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
+
+                {product.description && (
+                  <p className="text-xs text-muted-foreground mt-4 line-clamp-2">
+                    {product.description}
+                  </p>
+                )}
+              </Card>
+            ))}
           </div>
         )}
-
-        {/* Products Table */}
-        <div className="bg-card rounded-lg border border-border overflow-hidden">
-          {products.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground">
-              Nenhum produto cadastrado
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-muted/50 border-b border-border">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                      Nome
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                      Tipo
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                      Cor
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                      Preço
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((product: any) => (
-                    <tr key={product.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="px-6 py-3 text-foreground">{product.name}</td>
-                      <td className="px-6 py-3 text-foreground">{product.type}</td>
-                      <td className="px-6 py-3 text-foreground">{product.color || "-"}</td>
-                      <td className="px-6 py-3 text-foreground">
-                        {product.price ? `R$ ${parseFloat(product.price).toFixed(2)}` : "-"}
-                      </td>
-                      <td className="px-6 py-3">
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEdit(product)}
-                            className="border-accent text-accent hover:bg-accent/5"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => deleteProduct.mutate({ id: product.id })}
-                            className="border-destructive text-destructive hover:bg-destructive/5"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
       </div>
     </DashboardLayout>
   );
