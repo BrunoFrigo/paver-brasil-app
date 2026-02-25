@@ -36,6 +36,13 @@
       "when": 1772019413876,
       "tag": "0004_sticky_komodo",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1772019633650,
+      "tag": "0005_sad_chat",
+      "breakpoints": true
     }
   ]
 }

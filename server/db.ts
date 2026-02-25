@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, products, InsertProduct, quotations, InsertQuotation, galleryWorks, InsertGalleryWork } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import bcrypt from 'bcryptjs';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -87,6 +88,35 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+// Admin login queries
+export async function getUserByUsername(username: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createAdminUser(username: string, password: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const hashedPassword = await bcrypt.hash(password, 10);
+  
+  const result = await db.insert(users).values({
+    openId: `admin-${Date.now()}`,
+    username,
+    password: hashedPassword,
+    role: "admin",
+    name: username,
+  });
+  
+  return result;
+}
+
+export async function verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+  return bcrypt.compare(plainPassword, hashedPassword);
 }
 
 // Products queries

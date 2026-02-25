@@ -17,6 +17,32 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    login: publicProcedure
+      .input(z.object({
+        username: z.string(),
+        password: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const user = await db.getUserByUsername(input.username);
+        if (!user || !user.password) {
+          throw new Error("Invalid credentials");
+        }
+        
+        const isValidPassword = await db.verifyPassword(input.password, user.password);
+        if (!isValidPassword) {
+          throw new Error("Invalid credentials");
+        }
+        
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            username: user.username,
+            role: user.role,
+            name: user.name,
+          },
+        };
+      }),
   }),
 
   products: router({
