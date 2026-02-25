@@ -42,6 +42,7 @@
 ## Novas Funcionalidades Solicitadas
 - [x] Página de Anotações com CRUD completo (criar, editar, deletar, listar)
 - [x] Adicionar exibição de data e hora de criação em cada nota
+- [x] Corrigir atualização em tempo real das notas (sem recarregar página)
 
 ## Funcionalidades Futuras (Opcionais)
 - [ ] Upload de imagens para S3

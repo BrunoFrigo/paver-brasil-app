@@ -32,11 +32,13 @@ export default function Notes() {
   });
 
   const { data: notes = [] } = trpc.notes.list.useQuery();
+  const utils = trpc.useUtils();
   const createMutation = trpc.notes.create.useMutation({
     onSuccess: () => {
       toast.success("Anotação criada com sucesso!");
       setFormData({ title: "", content: "", color: "yellow" });
       setIsDialogOpen(false);
+      utils.notes.list.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao criar anotação");
@@ -49,6 +51,7 @@ export default function Notes() {
       setFormData({ title: "", content: "", color: "yellow" });
       setEditingId(null);
       setIsDialogOpen(false);
+      utils.notes.list.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao atualizar anotação");
@@ -58,6 +61,7 @@ export default function Notes() {
   const deleteMutation = trpc.notes.delete.useMutation({
     onSuccess: () => {
       toast.success("Anotação deletada com sucesso!");
+      utils.notes.list.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao deletar anotação");
@@ -67,6 +71,7 @@ export default function Notes() {
   const togglePinMutation = trpc.notes.update.useMutation({
     onSuccess: () => {
       toast.success("Anotação atualizada!");
+      utils.notes.list.invalidate();
     },
   });
 
