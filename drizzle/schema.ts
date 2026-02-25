@@ -80,3 +80,17 @@ export const galleryWorks = mysqlTable("galleryWorks", {
 
 export type GalleryWork = typeof galleryWorks.$inferSelect;
 export type InsertGalleryWork = typeof galleryWorks.$inferInsert;
+
+// Notes table
+export const notes = mysqlTable("notes", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  color: varchar("color", { length: 20 }).default("yellow"), // yellow, blue, green, pink, etc
+  isPinned: boolean("isPinned").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Note = typeof notes.$inferSelect;
+export type InsertNote = typeof notes.$inferInsert;

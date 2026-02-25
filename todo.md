@@ -39,6 +39,9 @@
 - [x] Verificação de TypeScript (sem erros)
 - [x] Verificação de responsividade
 
+## Novas Funcionalidades Solicitadas
+- [x] Página de Anotações com CRUD completo (criar, editar, deletar, listar)
+
 ## Funcionalidades Futuras (Opcionais)
 - [ ] Upload de imagens para S3
 - [ ] Sistema de email para notificações

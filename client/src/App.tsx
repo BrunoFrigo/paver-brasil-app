@@ -9,6 +9,7 @@ import AdminProducts from "./pages/AdminProducts";
 import Clients from "./pages/Clients";
 import Orders from "./pages/Orders";
 import AdminGallery from "./pages/AdminGallery";
+import Notes from "./pages/Notes";
 import Login from "./pages/Login";
 import { useEffect, useState } from "react";
 
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/clientes" component={() => <ProtectedRoute component={Clients} />} />
       <Route path="/pedidos" component={() => <ProtectedRoute component={Orders} />} />
       <Route path="/galeria" component={() => <ProtectedRoute component={AdminGallery} />} />
+      <Route path="/anotacoes" component={() => <ProtectedRoute component={Notes} />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

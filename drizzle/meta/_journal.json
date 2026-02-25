@@ -43,6 +43,13 @@
       "when": 1772019633650,
       "tag": "0005_sad_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1772020862023,
+      "tag": "0006_omniscient_cargill",
+      "breakpoints": true
     }
   ]
 }

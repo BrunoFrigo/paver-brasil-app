@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, InsertProduct, quotations, InsertQuotation, galleryWorks, InsertGalleryWork } from "../drizzle/schema";
+import { InsertUser, users, products, InsertProduct, quotations, InsertQuotation, galleryWorks, InsertGalleryWork, notes, InsertNote, Note } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import bcrypt from 'bcryptjs';
 
@@ -222,4 +222,37 @@ export async function deleteGalleryWork(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return db.delete(galleryWorks).where(eq(galleryWorks.id, id));
+}
+
+// Notes functions
+export async function listNotes() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(notes).orderBy(desc(notes.isPinned), desc(notes.updatedAt));
+}
+
+export async function getNoteById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(notes).where(eq(notes.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createNote(data: InsertNote) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(notes).values(data);
+  return result;
+}
+
+export async function updateNote(id: number, data: Partial<InsertNote>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(notes).set(data).where(eq(notes.id, id));
+}
+
+export async function deleteNote(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(notes).where(eq(notes.id, id));
 }

@@ -60,7 +60,6 @@ export const appRouter = router({
         price: z.string().optional(),
         unit: z.string().optional(),
         stock: z.string().optional(),
-        imageUrl: z.string().optional(),
       }))
       .mutation(({ input, ctx }) => {
         if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
@@ -77,7 +76,6 @@ export const appRouter = router({
         price: z.string().optional(),
         unit: z.string().optional(),
         stock: z.string().optional(),
-        imageUrl: z.string().optional(),
       }))
       .mutation(({ input, ctx }) => {
         if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
@@ -93,29 +91,23 @@ export const appRouter = router({
     updateStock: protectedProcedure
       .input(z.object({
         id: z.number(),
-        quantity: z.number(),
+        stock: z.string(),
       }))
       .mutation(({ input, ctx }) => {
         if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
-        return db.updateProductStock(input.id, input.quantity);
+        return db.updateProduct(input.id, { stock: input.stock });
       }),
   }),
 
   quotations: router({
-    list: protectedProcedure.query(({ ctx }) => {
-      if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
-      return db.getAllQuotations();
-    }),
-    getById: protectedProcedure
+    list: publicProcedure.query(() => db.getAllQuotations()),
+    getById: publicProcedure
       .input(z.object({ id: z.number() }))
-      .query(({ input, ctx }) => {
-        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
-        return db.getQuotationById(input.id);
-      }),
+      .query(({ input }) => db.getQuotationById(input.id)),
     create: publicProcedure
       .input(z.object({
         clientName: z.string(),
-        clientEmail: z.string().email(),
+        clientEmail: z.string(),
         clientPhone: z.string().optional(),
         address: z.string().optional(),
         description: z.string().optional(),
@@ -124,18 +116,11 @@ export const appRouter = router({
         deliveryPrice: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const result = await db.createQuotation({
-          ...input,
-          status: "pending",
+        const result = await db.createQuotation(input);
+        await notifyOwner({
+          title: "Novo Orçamento Recebido",
+          content: `Novo orçamento de ${input.clientName} (${input.clientEmail})`,
         });
-        try {
-          await notifyOwner({
-            title: "Novo Orçamento Recebido",
-            content: `Cliente: ${input.clientName}\nEmail: ${input.clientEmail}\nTelefone: ${input.clientPhone}\nArea: ${input.area} m²`,
-          });
-        } catch (error) {
-          console.error("Failed to notify owner:", error);
-        }
         return result;
       }),
     update: protectedProcedure
@@ -193,6 +178,43 @@ export const appRouter = router({
       .mutation(({ input, ctx }) => {
         if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
         return db.deleteGalleryWork(input.id);
+      }),
+  }),
+
+  notes: router({
+    list: protectedProcedure.query(() => db.listNotes()),
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(({ input }) => db.getNoteById(input.id)),
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        content: z.string(),
+        color: z.string().optional(),
+        isPinned: z.boolean().optional(),
+      }))
+      .mutation(({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        return db.createNote(input);
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        content: z.string().optional(),
+        color: z.string().optional(),
+        isPinned: z.boolean().optional(),
+      }))
+      .mutation(({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        const { id, ...data } = input;
+        return db.updateNote(id, data);
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        return db.deleteNote(input.id);
       }),
   }),
 });

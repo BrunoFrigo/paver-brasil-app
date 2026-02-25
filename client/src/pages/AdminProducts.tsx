@@ -119,14 +119,14 @@ export default function AdminProducts() {
 
   const handleIncreaseStock = (product: any) => {
     const newStock = (parseFloat(product.stock || "0") + 1);
-    updateStock.mutate({ id: product.id, quantity: newStock });
+    updateStock.mutate({ id: product.id, stock: newStock.toString() });
   };
 
   const handleDecreaseStock = (product: any) => {
     const currentStock = parseFloat(product.stock || "0");
     if (currentStock > 0) {
       const newStock = currentStock - 1;
-      updateStock.mutate({ id: product.id, quantity: newStock });
+      updateStock.mutate({ id: product.id, stock: newStock.toString() });
     }
   };
 
