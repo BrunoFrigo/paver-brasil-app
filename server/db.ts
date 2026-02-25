@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, products, InsertProduct, quotations, InsertQuotation, galleryWorks, InsertGalleryWork } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,95 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Products queries
+export async function getAllProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(products).orderBy(products.createdAt);
+}
+
+export async function getProductById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createProduct(data: InsertProduct) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(products).values(data);
+  return result;
+}
+
+export async function updateProduct(id: number, data: Partial<InsertProduct>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(products).set(data).where(eq(products.id, id));
+}
+
+export async function deleteProduct(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(products).where(eq(products.id, id));
+}
+
+// Quotations queries
+export async function getAllQuotations() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(quotations).orderBy(quotations.createdAt);
+}
+
+export async function getQuotationById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(quotations).where(eq(quotations.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createQuotation(data: InsertQuotation) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(quotations).values(data);
+  return result;
+}
+
+export async function updateQuotation(id: number, data: Partial<InsertQuotation>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(quotations).set(data).where(eq(quotations.id, id));
+}
+
+// Gallery queries
+export async function getAllGalleryWorks() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(galleryWorks).orderBy(galleryWorks.createdAt);
+}
+
+export async function getGalleryWorkById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(galleryWorks).where(eq(galleryWorks.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createGalleryWork(data: InsertGalleryWork) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(galleryWorks).values(data);
+  return result;
+}
+
+export async function updateGalleryWork(id: number, data: Partial<InsertGalleryWork>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(galleryWorks).set(data).where(eq(galleryWorks.id, id));
+}
+
+export async function deleteGalleryWork(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(galleryWorks).where(eq(galleryWorks.id, id));
+}
