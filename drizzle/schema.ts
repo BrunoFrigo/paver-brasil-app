@@ -54,6 +54,7 @@ export const quotations = mysqlTable("quotations", {
   description: text("description"),
   area: decimal("area", { precision: 10, scale: 2 }), // m²
   totalPrice: decimal("totalPrice", { precision: 12, scale: 2 }), // valor total do orçamento
+  deliveryPrice: decimal("deliveryPrice", { precision: 12, scale: 2 }), // valor da entrega
   status: mysqlEnum("status", ["pending", "approved", "completed", "rejected"]).default("pending").notNull(),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

@@ -23,6 +23,7 @@ interface OrderForm {
   description: string;
   area?: string;
   totalPrice?: string;
+  deliveryPrice?: string;
 }
 
 const defaultForm: OrderForm = {
@@ -33,6 +34,7 @@ const defaultForm: OrderForm = {
   description: "",
   area: "",
   totalPrice: "",
+  deliveryPrice: "",
 };
 
 export default function Orders() {
@@ -195,7 +197,7 @@ export default function Orders() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-foreground">Área (m²)</label>
                     <Input
@@ -215,6 +217,17 @@ export default function Orders() {
                       value={formData.totalPrice}
                       onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
                       placeholder="Ex: 5000.00"
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-foreground">Valor Entrega (R$)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.deliveryPrice}
+                      onChange={(e) => setFormData({ ...formData, deliveryPrice: e.target.value })}
+                      placeholder="Ex: 500.00"
                       className="mt-2"
                     />
                   </div>
@@ -306,8 +319,8 @@ export default function Orders() {
                         <td className="px-6 py-4 text-sm text-accent font-semibold">
                           {quotation.totalPrice ? formatCurrency(quotation.totalPrice) : "R$ 0,00"}
                         </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">
-                          -
+                        <td className="px-6 py-4 text-sm text-accent font-semibold">
+                          {quotation.deliveryPrice ? formatCurrency(quotation.deliveryPrice) : "R$ 0,00"}
                         </td>
                         <td className="px-6 py-4">
                           <select

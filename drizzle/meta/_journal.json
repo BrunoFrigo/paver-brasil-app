@@ -29,6 +29,13 @@
       "when": 1772019286690,
       "tag": "0003_broken_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1772019413876,
+      "tag": "0004_sticky_komodo",
+      "breakpoints": true
     }
   ]
 }
