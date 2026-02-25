@@ -32,6 +32,8 @@ export const appRouter = router({
         color: z.string().optional(),
         dimensions: z.string().optional(),
         price: z.string().optional(),
+        unit: z.string().optional(),
+        stock: z.string().optional(),
         imageUrl: z.string().optional(),
       }))
       .mutation(({ input, ctx }) => {
@@ -47,6 +49,8 @@ export const appRouter = router({
         color: z.string().optional(),
         dimensions: z.string().optional(),
         price: z.string().optional(),
+        unit: z.string().optional(),
+        stock: z.string().optional(),
         imageUrl: z.string().optional(),
       }))
       .mutation(({ input, ctx }) => {
@@ -59,6 +63,15 @@ export const appRouter = router({
       .mutation(({ input, ctx }) => {
         if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
         return db.deleteProduct(input.id);
+      }),
+    updateStock: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        quantity: z.number(),
+      }))
+      .mutation(({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        return db.updateProductStock(input.id, input.quantity);
       }),
   }),
 

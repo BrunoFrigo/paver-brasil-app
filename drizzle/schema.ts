@@ -34,6 +34,8 @@ export const products = mysqlTable("products", {
   color: varchar("color", { length: 100 }),
   dimensions: varchar("dimensions", { length: 100 }), // ex: 20x10x8 cm
   price: decimal("price", { precision: 10, scale: 2 }),
+  unit: varchar("unit", { length: 20 }).default("m2"), // m2, un, m
+  stock: decimal("stock", { precision: 10, scale: 2 }).default("0"), // quantidade em estoque
   imageUrl: text("imageUrl"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

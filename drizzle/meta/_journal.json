@@ -15,6 +15,13 @@
       "when": 1771986624286,
       "tag": "0001_broken_shinko_yamashiro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1772018600202,
+      "tag": "0002_dusty_the_captain",
+      "breakpoints": true
     }
   ]
 }

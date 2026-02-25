@@ -122,6 +122,12 @@ export async function deleteProduct(id: number) {
   return db.delete(products).where(eq(products.id, id));
 }
 
+export async function updateProductStock(id: number, quantity: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(products).set({ stock: quantity.toString() }).where(eq(products.id, id));
+}
+
 // Quotations queries
 export async function getAllQuotations() {
   const db = await getDb();

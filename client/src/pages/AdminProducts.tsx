@@ -22,6 +22,8 @@ interface ProductForm {
   color?: string;
   dimensions?: string;
   price?: string;
+  unit?: string;
+  stock?: string;
   imageUrl?: string;
 }
 
@@ -32,6 +34,8 @@ const defaultForm: ProductForm = {
   color: "",
   dimensions: "",
   price: "",
+  unit: "m2",
+  stock: "0",
   imageUrl: "",
 };
 
@@ -70,6 +74,13 @@ export default function AdminProducts() {
     onError: () => toast.error("Erro ao deletar produto"),
   });
 
+  const updateStock = trpc.products.updateStock.useMutation({
+    onSuccess: () => {
+      refetch();
+    },
+    onError: () => toast.error("Erro ao atualizar estoque"),
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name) {
@@ -85,7 +96,17 @@ export default function AdminProducts() {
   };
 
   const handleEdit = (product: any) => {
-    setFormData(product);
+    setFormData({
+      name: product.name,
+      type: product.type,
+      description: product.description || "",
+      color: product.color || "",
+      dimensions: product.dimensions || "",
+      price: product.price || "",
+      unit: product.unit || "m2",
+      stock: product.stock || "0",
+      imageUrl: product.imageUrl || "",
+    });
     setEditingId(product.id);
     setShowForm(true);
   };
@@ -96,11 +117,37 @@ export default function AdminProducts() {
     setFormData(defaultForm);
   };
 
+  const handleIncreaseStock = (product: any) => {
+    const newStock = (parseFloat(product.stock || "0") + 1);
+    updateStock.mutate({ id: product.id, quantity: newStock });
+  };
+
+  const handleDecreaseStock = (product: any) => {
+    const currentStock = parseFloat(product.stock || "0");
+    if (currentStock > 0) {
+      const newStock = currentStock - 1;
+      updateStock.mutate({ id: product.id, quantity: newStock });
+    }
+  };
+
   const filteredProducts = products.filter((p: any) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.color?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getUnitLabel = (unit: string | null | undefined) => {
+    switch (unit) {
+      case "m2":
+        return "m²";
+      case "un":
+        return "un";
+      case "m":
+        return "m";
+      default:
+        return "m²";
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -167,8 +214,8 @@ export default function AdminProducts() {
                 <div>
                   <label className="text-sm font-semibold text-foreground">Unidade</label>
                   <select
-                    value={formData.dimensions || "m2"}
-                    onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
+                    value={formData.unit || "m2"}
+                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
                     className="w-full mt-2 px-3 py-2 border border-border rounded-md bg-background text-foreground"
                   >
                     <option value="m2">Metro Quadrado (m²)</option>
@@ -231,9 +278,9 @@ export default function AdminProducts() {
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold text-foreground mb-2">{product.name}</h3>
                   <p className="text-2xl font-bold text-accent mb-1">
-                    R$ {product.price || "0,00"}
+                    R$ {parseFloat(product.price || "0").toFixed(2)}
                     <span className="text-sm text-muted-foreground ml-2">
-                      /{product.type === "Paver" ? "m²" : "un"}
+                      /{getUnitLabel(product.unit)}
                     </span>
                   </p>
                 </div>
@@ -245,16 +292,26 @@ export default function AdminProducts() {
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 bg-muted/30 rounded-md p-1">
-                      <button className="p-1 hover:bg-muted rounded">
+                      <button
+                        type="button"
+                        onClick={() => handleDecreaseStock(product)}
+                        className="p-1 hover:bg-muted rounded"
+                      >
                         <Minus className="w-4 h-4 text-muted-foreground" />
                       </button>
-                      <span className="w-12 text-center text-foreground font-medium">0</span>
-                      <button className="p-1 hover:bg-muted rounded">
+                      <span className="w-12 text-center text-foreground font-medium">
+                        {parseFloat(product.stock || "0").toFixed(0)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleIncreaseStock(product)}
+                        className="p-1 hover:bg-muted rounded"
+                      >
                         <Plus className="w-4 h-4 text-muted-foreground" />
                       </button>
                     </div>
                     <span className="text-accent font-semibold">
-                      0 {product.type === "Paver" ? "m²" : "un"}
+                      {parseFloat(product.stock || "0").toFixed(0)} {getUnitLabel(product.unit)}
                     </span>
                   </div>
                 </div>
