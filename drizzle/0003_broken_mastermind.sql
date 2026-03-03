@@ -1,1 +1,0 @@
-ALTER TABLE `quotations` ADD `totalPrice` decimal(12,2);
