@@ -1,9 +1,0 @@
-{
-  "query": "CREATE TABLE `notes` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`title` varchar(255) NOT NULL,\n\t`content` text NOT NULL,\n\t`color` varchar(20) DEFAULT 'yellow',\n\t`isPinned` boolean DEFAULT false,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `notes_id` PRIMARY KEY(`id`)\n);",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4NrqvCQTd5BL7eD.27116f77399b --database kq5EGEuKkfLqrwf9P5UQY3 --execute CREATE TABLE `notes` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`title` varchar(255) NOT NULL,\n\t`content` text NOT NULL,\n\t`color` varchar(20) DEFAULT 'yellow',\n\t`isPinned` boolean DEFAULT false,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `notes_id` PRIMARY KEY(`id`)\n);",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 534
-}
