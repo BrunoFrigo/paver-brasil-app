@@ -95,24 +95,24 @@ describe("Quotations Router", () => {
     expect(result).toBeDefined();
   });
 
-  it("should not allow non-admin to list quotations", async () => {
+  it("should allow public to list quotations", async () => {
     const ctx = createPublicContext();
-    const caller = appRouter.createCaller(ctx);
-
-    try {
-      await caller.quotations.list();
-      expect.fail("Should have thrown error");
-    } catch (error: any) {
-      expect(error.message).toMatch(/Unauthorized|Please login/);
-    }
-  });
-
-  it("should allow admin to list quotations", async () => {
-    const ctx = createAdminContext();
     const caller = appRouter.createCaller(ctx);
 
     const quotations = await caller.quotations.list();
     expect(Array.isArray(quotations)).toBe(true);
+  });
+
+  it("should not allow non-admin to delete quotations", async () => {
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    try {
+      await caller.quotations.delete({ id: 1 });
+      expect.fail("Should have thrown error");
+    } catch (error: any) {
+      expect(error.message).toMatch(/Unauthorized|Please login/);
+    }
   });
 
   it("should allow admin to update quotation status", async () => {

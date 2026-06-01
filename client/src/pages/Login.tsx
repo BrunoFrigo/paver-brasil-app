@@ -16,7 +16,9 @@ export default function Login() {
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: (data) => {
       if (data.success) {
+        const userToken = Buffer.from(JSON.stringify(data.user)).toString('base64');
         localStorage.setItem("userSession", JSON.stringify(data.user));
+        localStorage.setItem("userToken", userToken);
         toast.success("Login realizado com sucesso!");
         setLocation("/");
         // Reload page to update auth state
