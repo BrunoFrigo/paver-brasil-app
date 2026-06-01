@@ -20,7 +20,7 @@ export async function createContext(
     const authHeader = opts.req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
-        const userJson = Buffer.from(authHeader.slice(7), 'base64').toString('utf-8');
+        const userJson = typeof atob === 'function' ? atob(authHeader.slice(7)) : Buffer.from(authHeader.slice(7), 'base64').toString('utf-8');
         const parsedUser = JSON.parse(userJson);
         // Map the parsed user to the User type
         user = {

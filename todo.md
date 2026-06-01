@@ -47,6 +47,8 @@
 - [x] Implementar router tRPC para clientes (list, create, update, delete)
 - [x] Atualizar página de Clientes para usar novo router de clientes
 - [x] Adicionar testes para router de clientes
+- [x] Corrigir erro de Buffer no cliente (usar btoa em vez de Buffer.from)
+- [x] Corrigir erro de Buffer no servidor (usar atob em vez de Buffer.from)
 
 ## Funcionalidades Futuras (Opcionais)
 - [ ] Upload de imagens para S3
