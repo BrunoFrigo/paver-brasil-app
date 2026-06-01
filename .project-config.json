@@ -1,0 +1,43 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "db",
+    "server",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://4NrqvCQTd5BL7eD.27116f77399b:6FfAj9ps0yx8T8WHIrM0@gateway03.us-east-1.prod.aws.tidbcloud.com:4000/kq5EGEuKkfLqrwf9P5UQY3?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": [
+    "no_db_push"
+  ],
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663332703817/kq5EGEuKkfLqrwf9P5UQY3",
+    "access_key_id": "ASIAZV3A2ECZOM6BMZMI",
+    "secret_access_key": "TQ0dnFOvvwUqresgNqGiYfCq3PDMzifQ+AAuVf9j",
+    "session_token": "IQoJb3JpZ2luX2VjEEUaCXVzLWVhc3QtMSJHMEUCIDi3Dk7OiKAH40SUptClkuH3UW7pP2w7Vq//hf/hsu0FAiEA5J2y5SiScv5pnvWHKXdZcb2aN3e584tLKlyn+nMjxs8q9gMIDRAEGgw2NjUzODYwOTg4NjYiDLXwnFk2lesSKUpOZirTAyf9vKZJi7AGosFrYIW0WNO7VXQRzcezR3USxXI4ZXT8KxnLEaHFYk05woVSLZujFhrZtmdXKRtGr2HJXDXK+kNRufmSuxvI94E5JJ4zvxw/zPCzZvqjaGt70XWP/1XtDfkmOPoTBx+4GqJU9CSZDC1jLaJjqggrueDkrE2fmU4bmCI7vJlEsUTtZ13R34tHwdxC4+6+/8mxo3dmw2MrRTaKMjSogdMb4FJEPpNxuwihlYb4omYrqR2gUN2x6hRgFbeUht9n+wS6hi28huvslyrUIUACoixvbiK1rlHUQWjzOZJvMUhEulR8CrvxYOLy5bNC0/2lOKQm08UcuAC5ZVD0pptrMDFP9VqVWpC6r+5AhEI1Et6vwCFog0NT8dPQOtVT3SmUp3Sf/prtCWRGPwYajEL7HaRk3dPIiGm+E8z3tpwW9T0kB6WPjH5gcIBDPlgTZ8Q0OT1y/GlJ+9v4CpmGE6cD03Ouzu2yubDciZb/hiBO2gY3svehGD7b5sEDD8hAn7zKVjtSrJ/A/2THtgB16++b21wt3p/HOc6On8EQZpxQVXXwwdnnsdebhEwrc65A+7CUswADQPOjpARRJogbn31yUETcI7m/QT16ERU03WLaMKTs9dAGOp0BszNW6P5AnuN+4dynf3bd93mLOVJ0SWKNxpetT9bu8rMmIVsLqVx3CmY0UoABvQyJ6Bs+m7fzcx1bfo5DwHlwYsJpcKgBu1TXckHypiEYctAsxSAHPZF9B5FKslBXPDVozkaiyybXZ0CgZgLV3X9Y99Xaxtl5LNqaGwCR16OEgybj1n42mSHNlv9ePospyKBZlS1kWfjRPiLTERD+Vw==",
+    "expiration": "2026-06-02T00:08:04.000Z"
+  },
+  "name": "paver-brasil-app",
+  "path": "/home/ubuntu/paver-brasil-app",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "oCJLtCj6B7YUHvBiL6n9B5",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "JWT_SECRET": "Bupymg47tUqjTuyyiLfbrN",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Bruno Frigo",
+    "OWNER_OPEN_ID": "gV6MfGC5pV2jvswN4oVa57",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "651d670d-3470-4bf7-afae-fd8a472e2889",
+    "VITE_APP_ID": "kq5EGEuKkfLqrwf9P5UQY3",
+    "VITE_APP_LOGO": "https://files.manuscdn.com/user_upload_by_module/web_dev_logo/310519663332703817/fkgtpWZvFhWvrQzt.png",
+    "VITE_APP_TITLE": "PaverBrasil - Gestão e Pavimentação",
+    "VITE_FRONTEND_FORGE_API_KEY": "D45wQStQnNx2sG5F6CfEq4",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}

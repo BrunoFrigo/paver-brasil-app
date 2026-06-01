@@ -7,11 +7,6 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Loader2 } from "lucide-react";
 
-// Helper to encode user to base64
-function encodeUserToken(user: any): string {
-  return Buffer.from(JSON.stringify(user)).toString('base64');
-}
-
 export default function Login() {
   const [, setLocation] = useLocation();
   const [username, setUsername] = useState("");
@@ -21,9 +16,7 @@ export default function Login() {
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: (data) => {
       if (data.success) {
-        const userToken = Buffer.from(JSON.stringify(data.user)).toString('base64');
         localStorage.setItem("userSession", JSON.stringify(data.user));
-        localStorage.setItem("userToken", userToken);
         toast.success("Login realizado com sucesso!");
         setLocation("/");
         // Reload page to update auth state

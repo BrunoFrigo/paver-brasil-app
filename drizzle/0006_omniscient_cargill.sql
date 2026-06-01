@@ -1,0 +1,10 @@
+CREATE TABLE `notes` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`title` varchar(255) NOT NULL,
+	`content` text NOT NULL,
+	`color` varchar(20) DEFAULT 'yellow',
+	`isPinned` boolean DEFAULT false,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `notes_id` PRIMARY KEY(`id`)
+);

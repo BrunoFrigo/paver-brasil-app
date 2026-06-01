@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `users` ADD `username` varchar(255);\nALTER TABLE `users` ADD `password` text;\nALTER TABLE `users` ADD CONSTRAINT `users_username_unique` UNIQUE(`username`);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4NrqvCQTd5BL7eD.27116f77399b --database kq5EGEuKkfLqrwf9P5UQY3 --execute ALTER TABLE `users` ADD `username` varchar(255);\nALTER TABLE `users` ADD `password` text;\nALTER TABLE `users` ADD CONSTRAINT `users_username_unique` UNIQUE(`username`);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1874
+}

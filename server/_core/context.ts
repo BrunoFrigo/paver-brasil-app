@@ -16,20 +16,8 @@ export async function createContext(
   try {
     user = await sdk.authenticateRequest(opts.req);
   } catch (error) {
-    // Try to get user from authorization header (for local login)
-    const authHeader = opts.req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      try {
-        const userJson = Buffer.from(authHeader.slice(7), 'base64').toString('utf-8');
-        user = JSON.parse(userJson) as User;
-      } catch (e) {
-        // Failed to parse user from header
-        user = null;
-      }
-    } else {
-      // Authentication is optional for public procedures.
-      user = null;
-    }
+    // Authentication is optional for public procedures.
+    user = null;
   }
 
   return {

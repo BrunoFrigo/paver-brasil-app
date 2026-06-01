@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO users (openId, username, password, role, name, email, loginMethod, createdAt, updatedAt, lastSignedIn) \nVALUES (\n  'admin-claudineifrigo',\n  'claudineifrigo',\n  '$2a$10$8vGEbhKjLzCBzAJLZRkP.OKVVlQtR7Ew6jJ5.5K5.5K5.5K5.5K5',\n  'admin',\n  'Claudinei Frigo',\n  'admin@paverbrasil.com',\n  'local',\n  NOW(),\n  NOW(),\n  NOW()\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4NrqvCQTd5BL7eD.27116f77399b --database kq5EGEuKkfLqrwf9P5UQY3 --execute INSERT INTO users (openId, username, password, role, name, email, loginMethod, createdAt, updatedAt, lastSignedIn) \nVALUES (\n  'admin-claudineifrigo',\n  'claudineifrigo',\n  '$2a$10$8vGEbhKjLzCBzAJLZRkP.OKVVlQtR7Ew6jJ5.5K5.5K5.5K5.5K5',\n  'admin',\n  'Claudinei Frigo',\n  'admin@paverbrasil.com',\n  'local',\n  NOW(),\n  NOW(),\n  NOW()\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 364
+}
