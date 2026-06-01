@@ -12,9 +12,17 @@ import { toast } from "sonner";
 export default function Clients() {
   const { data: clients = [], isLoading } = trpc.clients.list.useQuery();
   const { data: quotations = [] } = trpc.quotations.list.useQuery();
-  const createMutation = trpc.clients.create.useMutation();
-  const deleteMutation = trpc.clients.delete.useMutation();
   const utils = trpc.useUtils();
+  const createMutation = trpc.clients.create.useMutation();
+  const deleteMutation = trpc.clients.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Cliente deletado com sucesso");
+      utils.clients.list.invalidate();
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao deletar cliente");
+    },
+  });
 
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -63,16 +71,9 @@ export default function Clients() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = (id: number) => {
     if (!confirm("Tem certeza que deseja deletar este cliente?")) return;
-
-    try {
-      await deleteMutation.mutateAsync({ id });
-      toast.success("Cliente deletado com sucesso");
-      await utils.clients.list.invalidate();
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao deletar cliente");
-    }
+    deleteMutation.mutate({ id });
   };
 
   const getQuotationCount = (clientId: number) => {
