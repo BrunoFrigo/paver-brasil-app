@@ -81,6 +81,24 @@ export const galleryWorks = mysqlTable("galleryWorks", {
 export type GalleryWork = typeof galleryWorks.$inferSelect;
 export type InsertGalleryWork = typeof galleryWorks.$inferInsert;
 
+// Clients table
+export const clients = mysqlTable("clients", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 20 }),
+  address: text("address"),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 2 }),
+  zipCode: varchar("zipCode", { length: 10 }),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Client = typeof clients.$inferSelect;
+export type InsertClient = typeof clients.$inferInsert;
+
 // Notes table
 export const notes = mysqlTable("notes", {
   id: int("id").autoincrement().primaryKey(),

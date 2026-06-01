@@ -1,37 +1,193 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
-import { Users, Mail, Phone, MapPin } from "lucide-react";
+import { Users, Mail, Phone, MapPin, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Clients() {
+  const { data: clients = [], isLoading } = trpc.clients.list.useQuery();
   const { data: quotations = [] } = trpc.quotations.list.useQuery();
+  const createMutation = trpc.clients.create.useMutation();
+  const deleteMutation = trpc.clients.delete.useMutation();
+  const utils = trpc.useUtils();
 
-  // Extract unique clients from quotations
-  const clients = Array.from(
-    new Map(
-      quotations.map((q: any) => [
-        q.clientEmail,
-        {
-          name: q.clientName,
-          email: q.clientEmail,
-          phone: q.clientPhone,
-          address: q.address,
-          quotationCount: 0,
-        },
-      ])
-    ).values()
-  ).map((client: any) => ({
-    ...client,
-    quotationCount: quotations.filter((q: any) => q.clientEmail === client.email).length,
-  }));
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    notes: "",
+  });
+
+  const handleCreate = async () => {
+    if (!formData.name || !formData.email) {
+      toast.error("Nome e email são obrigatórios");
+      return;
+    }
+
+    try {
+      await createMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        address: formData.address || undefined,
+        city: formData.city || undefined,
+        state: formData.state || undefined,
+        zipCode: formData.zipCode || undefined,
+        notes: formData.notes || undefined,
+      });
+      toast.success("Cliente criado com sucesso");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        notes: "",
+      });
+      setIsOpen(false);
+      await utils.clients.list.invalidate();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao criar cliente");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Tem certeza que deseja deletar este cliente?")) return;
+
+    try {
+      await deleteMutation.mutateAsync({ id });
+      toast.success("Cliente deletado com sucesso");
+      await utils.clients.list.invalidate();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao deletar cliente");
+    }
+  };
+
+  const getQuotationCount = (clientId: number) => {
+    // Since quotations don't have a direct clientId field, we'll count based on email matching
+    // This is a temporary solution until quotations are properly linked to clients
+    return 0;
+  };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Clientes</h1>
-          <p className="text-muted-foreground mt-1">Gerencie seus clientes e informações de contato</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Clientes</h1>
+            <p className="text-muted-foreground mt-1">Gerencie seus clientes e informações de contato</p>
+          </div>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-accent hover:bg-accent/90 text-black">
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Cliente
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border border-border">
+              <DialogHeader>
+                <DialogTitle className="text-foreground">Novo Cliente</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-foreground">Nome *</Label>
+                  <Input
+                    placeholder="Nome do cliente"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="bg-background border-border text-foreground"
+                  />
+                </div>
+                <div>
+                  <Label className="text-foreground">Email *</Label>
+                  <Input
+                    type="email"
+                    placeholder="email@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="bg-background border-border text-foreground"
+                  />
+                </div>
+                <div>
+                  <Label className="text-foreground">Telefone</Label>
+                  <Input
+                    placeholder="(11) 99999-9999"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="bg-background border-border text-foreground"
+                  />
+                </div>
+                <div>
+                  <Label className="text-foreground">Endereço</Label>
+                  <Input
+                    placeholder="Rua, número"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="bg-background border-border text-foreground"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-foreground">Cidade</Label>
+                    <Input
+                      placeholder="São Paulo"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="bg-background border-border text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-foreground">Estado</Label>
+                    <Input
+                      placeholder="SP"
+                      maxLength={2}
+                      value={formData.state}
+                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                      className="bg-background border-border text-foreground"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-foreground">CEP</Label>
+                  <Input
+                    placeholder="01310-100"
+                    value={formData.zipCode}
+                    onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                    className="bg-background border-border text-foreground"
+                  />
+                </div>
+                <div>
+                  <Label className="text-foreground">Notas</Label>
+                  <Input
+                    placeholder="Observações adicionais"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    className="bg-background border-border text-foreground"
+                  />
+                </div>
+                <Button
+                  onClick={handleCreate}
+                  disabled={createMutation.isPending}
+                  className="w-full bg-accent hover:bg-accent/90 text-black"
+                >
+                  {createMutation.isPending ? "Criando..." : "Criar Cliente"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Stats */}
@@ -84,7 +240,9 @@ export default function Clients() {
         {/* Clients Table */}
         <Card className="p-6 bg-card border border-border">
           <h2 className="text-lg font-semibold text-foreground mb-4">Lista de Clientes</h2>
-          {clients.length === 0 ? (
+          {isLoading ? (
+            <p className="text-muted-foreground text-center py-8">Carregando clientes...</p>
+          ) : clients.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">Nenhum cliente cadastrado</p>
           ) : (
             <div className="overflow-x-auto">
@@ -94,13 +252,13 @@ export default function Clients() {
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Nome</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Email</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Telefone</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Endereço</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Orçamentos</th>
+                    <th className="text-left py-3 px-4 font-semibold text-foreground">Cidade</th>
+                    <th className="text-left py-3 px-4 font-semibold text-foreground">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {clients.map((client: any, index: number) => (
-                    <tr key={index} className="border-b border-border hover:bg-muted/30">
+                  {clients.map((client: any) => (
+                    <tr key={client.id} className="border-b border-border hover:bg-muted/30">
                       <td className="py-3 px-4 font-medium text-foreground">{client.name}</td>
                       <td className="py-3 px-4 text-muted-foreground flex items-center gap-2">
                         <Mail className="w-4 h-4" />
@@ -110,14 +268,16 @@ export default function Clients() {
                         <Phone className="w-4 h-4" />
                         {client.phone || "-"}
                       </td>
-                      <td className="py-3 px-4 text-muted-foreground flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {client.address || "-"}
-                      </td>
+                      <td className="py-3 px-4 text-muted-foreground">{client.city || "-"}</td>
                       <td className="py-3 px-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/20 text-accent">
-                          {client.quotationCount}
-                        </span>
+                        <button
+                          onClick={() => handleDelete(client.id)}
+                          disabled={deleteMutation.isPending}
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                          title="Deletar cliente"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}

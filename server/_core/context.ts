@@ -21,7 +21,21 @@ export async function createContext(
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {
         const userJson = Buffer.from(authHeader.slice(7), 'base64').toString('utf-8');
-        user = JSON.parse(userJson) as User;
+        const parsedUser = JSON.parse(userJson);
+        // Map the parsed user to the User type
+        user = {
+          id: parsedUser.id || 1,
+          openId: parsedUser.username || 'local-user',
+          username: parsedUser.username,
+          name: parsedUser.name || parsedUser.username,
+          email: parsedUser.email || null,
+          role: parsedUser.role || 'admin',
+          loginMethod: 'local',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          lastSignedIn: new Date(),
+          password: null,
+        } as User;
       } catch (e) {
         // Failed to parse user from header
         user = null;

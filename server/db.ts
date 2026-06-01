@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, InsertProduct, quotations, InsertQuotation, galleryWorks, InsertGalleryWork, notes, InsertNote, Note } from "../drizzle/schema";
+import { InsertUser, users, products, InsertProduct, quotations, InsertQuotation, galleryWorks, InsertGalleryWork, notes, InsertNote, Note, clients, InsertClient, Client } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import bcrypt from 'bcryptjs';
 
@@ -255,4 +255,37 @@ export async function deleteNote(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return db.delete(notes).where(eq(notes.id, id));
+}
+
+// Clients queries
+export async function getAllClients() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(clients).orderBy(clients.createdAt);
+}
+
+export async function getClientById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(clients).where(eq(clients.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createClient(data: InsertClient) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(clients).values(data);
+  return result;
+}
+
+export async function updateClient(id: number, data: Partial<InsertClient>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(clients).set(data).where(eq(clients.id, id));
+}
+
+export async function deleteClient(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(clients).where(eq(clients.id, id));
 }

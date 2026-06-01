@@ -217,6 +217,51 @@ export const appRouter = router({
         return db.deleteNote(input.id);
       }),
   }),
+
+  clients: router({
+    list: publicProcedure.query(() => db.getAllClients()),
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(({ input }) => db.getClientById(input.id)),
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+        email: z.string(),
+        phone: z.string().optional(),
+        address: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zipCode: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        return db.createClient(input);
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        email: z.string().optional(),
+        phone: z.string().optional(),
+        address: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zipCode: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        const { id, ...data } = input;
+        return db.updateClient(id, data);
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Unauthorized");
+        return db.deleteClient(input.id);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

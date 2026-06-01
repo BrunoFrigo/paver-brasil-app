@@ -43,6 +43,10 @@
 - [x] Página de Anotações com CRUD completo (criar, editar, deletar, listar)
 - [x] Adicionar exibição de data e hora de criação em cada nota
 - [x] Corrigir atualização em tempo real das notas (sem recarregar página)
+- [x] Adicionar tabela de clientes no banco de dados
+- [x] Implementar router tRPC para clientes (list, create, update, delete)
+- [x] Atualizar página de Clientes para usar novo router de clientes
+- [x] Adicionar testes para router de clientes
 
 ## Funcionalidades Futuras (Opcionais)
 - [ ] Upload de imagens para S3

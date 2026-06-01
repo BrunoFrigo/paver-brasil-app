@@ -50,6 +50,13 @@
       "when": 1772020862023,
       "tag": "0006_omniscient_cargill",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1780318750184,
+      "tag": "0007_worthless_sleepwalker",
+      "breakpoints": true
     }
   ]
 }
